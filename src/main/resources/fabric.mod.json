@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "maceswap",
+  "version": "${version}",
+  "name": "MaceSwap",
+  "description": "Automatically axe-hit and return to the mace when attacking with the mace.",
+  "authors": ["WillDaboy"],
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.willdaboy.maceswap.MaceSwapClient"
+    ]
+  },
+  "mixins": [
+    "maceswap.client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "java": ">=21"
+  }
+}
