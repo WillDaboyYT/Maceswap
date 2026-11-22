@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.Hand;
 import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,8 +26,16 @@ public abstract class MinecraftClientMixin {
 
         PlayerInventory inventory = client.player.getInventory();
         PlayerInventoryAccessor slotAccess = (PlayerInventoryAccessor) inventory;
-        if (slotAccess.maceswap$getSelectedSlot() != 4
-                || !client.player.getMainHandStack().isOf(Items.MACE)) {
+        int originalSlot = slotAccess.maceswap$getSelectedSlot();
+
+        // Hotbar slots are zero-indexed: sword = slot 2 (index 1),
+        // axe = slot 4 (index 3), mace = slot 5 (index 4).
+        boolean holdingMace = originalSlot == 4
+                && client.player.getMainHandStack().isOf(Items.MACE);
+        boolean holdingSword = originalSlot == 1
+                && client.player.getMainHandStack().isIn(ItemTags.SWORDS);
+
+        if (!holdingMace && !holdingSword) {
             return;
         }
 
@@ -39,14 +46,13 @@ public abstract class MinecraftClientMixin {
 
         maceswap$inSequence = true;
         try {
-            // Hotbar slots are zero-indexed in code: slot 4 is index 3, slot 5 is index 4.
             slotAccess.maceswap$setSelectedSlot(3);
             ((MinecraftClientInvoker) (Object) client).maceswap$invokeDoAttack();
 
-            slotAccess.maceswap$setSelectedSlot(4);
+            slotAccess.maceswap$setSelectedSlot(originalSlot);
             ((MinecraftClientInvoker) (Object) client).maceswap$invokeDoAttack();
         } finally {
-            slotAccess.maceswap$setSelectedSlot(4);
+            slotAccess.maceswap$setSelectedSlot(originalSlot);
             maceswap$inSequence = false;
         }
 
